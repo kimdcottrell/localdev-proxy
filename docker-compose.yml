@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  # This is an optional security container.
+  # This will be used to filter ONLY get requests to the Docker Engine API.
+  # It stops stuff like https://blog.quarkslab.com/why-is-exposing-the-docker-socket-a-really-bad-idea.html
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    restart: unless-stopped
+    privileged: true
+    userns_mode: host # this is needed if https://docs.docker.com/engine/security/userns-remap/#enable-userns-remap-on-the-daemon is setup
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      CONTAINERS: 1 # tell the proxy to grant get requests to /containers/* from the Docker API
+    networks:
+      - default # we only want to be able to access this inside this network's container stack
+
+  traefik:
+    image: traefik:v2.10
+    restart: unless-stopped
+    command: --log.level=DEBUG
+    depends_on:
+      - socket-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./traefik.yml:/etc/traefik/traefik.yml
+    labels:
+      # Explicitly tell Traefik to expose this container
+      - traefik.enable=true
+      # The domain the service will respond to
+      - traefik.http.routers.reverseproxy.rule=Host(`admin.traefik`)
+      # Allow request only from the predefined entry point named "web"
+      - traefik.http.routers.reverseproxy.entrypoints=web
+      - traefik.http.services.reverseproxy.loadbalancer.server.port=8080
+    networks:
+      - proxy
+      - default # run this container on the default network so it can access the socket-proxy container
+
+  whoami:
+    image: traefik/whoami
+    restart: unless-stopped
+    depends_on:
+      - socket-proxy
+      - traefik
+    labels:
+      # Explicitly tell Traefik to expose this container
+      - traefik.enable=true
+      # The domain the service will respond to
+      - traefik.http.routers.whoami.rule=Host(`whoami.traefik`)
+      # Allow request only from the predefined entry point named "web"
+      - traefik.http.routers.whoami.entrypoints=web
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    name: proxy
+

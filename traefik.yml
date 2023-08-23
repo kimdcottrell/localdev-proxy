@@ -1,0 +1,19 @@
+api:
+  insecure: true
+  dashboard: true
+  debug: false
+
+entryPoints:
+  web:
+    address: ":80"
+
+log:
+  format: json
+  level: DEBUG
+
+providers:
+  docker:
+    endpoint: "tcp://socket-proxy:2375"
+    watch: true
+    exposedbydefault: false
+    network: proxy

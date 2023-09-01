@@ -2,6 +2,10 @@
 
 Sometimes, you want to use domain names for your local development containers. 
 
+This repo is referenced in the following blog posts:
+
+https://kimdcottrell.com/posts/5-steps-to-achieving-https-and-domain-names-for-docker-local-development-envs/
+
 ## Starting this reverse proxy and accessing the admin panel
 
 Firstoff, if you're running any webserver directly on your local machine, shut it down. It will cause port conflict errors.

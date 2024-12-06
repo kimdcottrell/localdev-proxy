@@ -1,0 +1,4 @@
+tls:
+  certificates:
+    - certFile: /etc/certs/wildcard-local-dev-cert.pem
+      keyFile: /etc/certs/wildcard-local-dev-key.pem

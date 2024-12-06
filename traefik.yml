@@ -6,6 +6,8 @@ api:
 entryPoints:
   web:
     address: ":80"
+  web-secure:
+    address: ":443"
 
 log:
   format: json
@@ -17,3 +19,6 @@ providers:
     watch: true
     exposedbydefault: false
     network: proxy
+  file:
+    filename: /etc/traefik/dynamic_conf.yml
+    watch: true
